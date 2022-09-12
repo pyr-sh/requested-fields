@@ -1,8 +1,9 @@
 package fields
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type Variables map[string]interface{}
@@ -150,17 +151,17 @@ func TestBuildTree(t *testing.T) {
 		}`
 
 	expectedTreeA := map[string][]string{
-		"":                                     []string{"search", "search_users"},
-		"search":                               []string{"term", "products"},
-		"search.products":                      []string{"edges"},
-		"search.products.edges":                []string{"node", "cursor"},
-		"search.products.edges.node":           []string{"id", "title", "seller"},
-		"search.products.edges.node.seller":    []string{"id", "name"},
-		"search_users":                         []string{"term", "users"},
-		"search_users.users":                   []string{"edges"},
-		"search_users.users.edges":             []string{"node", "cursor"},
-		"search_users.users.edges.node":        []string{"id", "title", "seller"},
-		"search_users.users.edges.node.seller": []string{"id", "name"},
+		"":                                     {"search", "search_users"},
+		"search":                               {"term", "products"},
+		"search.products":                      {"edges"},
+		"search.products.edges":                {"node", "cursor"},
+		"search.products.edges.node":           {"id", "title", "seller"},
+		"search.products.edges.node.seller":    {"id", "name"},
+		"search_users":                         {"term", "users"},
+		"search_users.users":                   {"edges"},
+		"search_users.users.edges":             {"node", "cursor"},
+		"search_users.users.edges.node":        {"id", "title", "seller"},
+		"search_users.users.edges.node.seller": {"id", "name"},
 	}
 
 	generatedTreeA := BuildTree(graphqlQueryA, Variables{})
@@ -170,8 +171,8 @@ func TestBuildTree(t *testing.T) {
 	assert.Equal(t, expectedTreeA, generatedTreeA)
 
 	expectedTreeB := map[string][]string{
-		"":      []string{"users"},
-		"users": []string{"id", "title"},
+		"":      {"users"},
+		"users": {"id", "title"},
 	}
 
 	generatedTreeB := BuildTree(graphqlQueryB, Variables{})
@@ -179,7 +180,7 @@ func TestBuildTree(t *testing.T) {
 	assert.Equal(t, expectedTreeB, generatedTreeB)
 
 	expectedTreeC := map[string][]string{
-		"": []string{"hello"},
+		"": {"hello"},
 	}
 
 	generatedTreeC := BuildTree(graphqlQueryC, Variables{})
@@ -187,8 +188,8 @@ func TestBuildTree(t *testing.T) {
 	assert.Equal(t, expectedTreeC, generatedTreeC)
 
 	expectedTreeD := map[string][]string{
-		"":     []string{"user"},
-		"user": []string{"id", "name"},
+		"":     {"user"},
+		"user": {"id", "name"},
 	}
 
 	generatedTreeD := BuildTree(graphqlQueryD, Variables{})
@@ -196,8 +197,8 @@ func TestBuildTree(t *testing.T) {
 	assert.Equal(t, expectedTreeD, generatedTreeD)
 
 	expectedTreeE := map[string][]string{
-		"":     []string{"user"},
-		"user": []string{"id", "name", "age"},
+		"":     {"user"},
+		"user": {"id", "name", "age"},
 	}
 
 	generatedTreeE := BuildTree(graphqlQueryE, Variables{})
@@ -205,18 +206,18 @@ func TestBuildTree(t *testing.T) {
 	assert.Equal(t, expectedTreeE, generatedTreeE)
 
 	expectedTreeF := map[string][]string{
-		"":                  []string{"users"},
-		"users":             []string{"users"},
-		"users.users":       []string{"users"},
-		"users.users.users": []string{"name"}}
+		"":                  {"users"},
+		"users":             {"users"},
+		"users.users":       {"users"},
+		"users.users.users": {"name"}}
 
 	generatedTreeF := BuildTree(graphqlQueryF, Variables{})
 
 	assert.Equal(t, expectedTreeF, generatedTreeF)
 
 	expectedTreeG := map[string][]string{
-		"":      []string{"field"},
-		"field": []string{"sub_field"}}
+		"":      {"field"},
+		"field": {"sub_field"}}
 
 	generatedTreeG := BuildTree(graphqlQueryG, Variables{})
 
@@ -255,13 +256,13 @@ func TestBuildTree(t *testing.T) {
 		}
 	`
 	expectedTreeH := map[string][]string{
-		"":                 []string{"product", "search", "other_a", "other_b"},
-		"other_a":          []string{"products"},
-		"other_a.products": []string{"total"},
-		"other_b":          []string{"products"},
-		"other_b.products": []string{"total"},
-		"product":          []string{"id"},
-		"search":           []string{"term"}}
+		"":                 {"product", "search", "other_a", "other_b"},
+		"other_a":          {"products"},
+		"other_a.products": {"total"},
+		"other_b":          {"products"},
+		"other_b.products": {"total"},
+		"product":          {"id"},
+		"search":           {"term"}}
 
 	generatedTreeH := BuildTreeUsingAliases(graphqlQueryH, Variables{})
 
@@ -290,10 +291,10 @@ func TestBuildTree(t *testing.T) {
 
 	`
 	expectedTreeI := map[string][]string{
-		"":                                []string{"search"},
-		"search":                          []string{"aggregations", "some_field"},
-		"search.aggregations":             []string{"departments"},
-		"search.aggregations.departments": []string{"slug", "name", "__typename"}}
+		"":                                {"search"},
+		"search":                          {"aggregations", "some_field"},
+		"search.aggregations":             {"departments"},
+		"search.aggregations.departments": {"slug", "name", "__typename"}}
 
 	generatedTreeI := BuildTreeUsingAliases(graphqlQueryI, Variables{})
 
@@ -322,11 +323,11 @@ func TestBuildTree(t *testing.T) {
 
 	`
 	expectedTreeJ := map[string][]string{
-		"": []string{"search"},
-		"search": []string{
+		"": {"search"},
+		"search": {
 			"aggregations", "some_field"},
-		"search.aggregations": []string{"departments"},
-		"search.aggregations.departments": []string{
+		"search.aggregations": {"departments"},
+		"search.aggregations.departments": {
 			"slug", "name", "__typename"}}
 
 	generatedTreeJ := BuildTreeUsingAliases(graphqlQueryJ, Variables{})
@@ -354,11 +355,11 @@ func TestBuildTree(t *testing.T) {
 
 	`
 	expectedTreeK := map[string][]string{
-		"": []string{"search"},
-		"search": []string{
+		"": {"search"},
+		"search": {
 			"aggregations_FALSE", "some_field"},
-		"search.aggregations_FALSE": []string{"departments"},
-		"search.aggregations_FALSE.departments": []string{
+		"search.aggregations_FALSE": {"departments"},
+		"search.aggregations_FALSE.departments": {
 			"slug", "name", "__typename"}}
 
 	generatedTreeK := BuildTreeUsingAliases(graphqlQueryK, Variables{})
@@ -386,11 +387,11 @@ func TestBuildTree(t *testing.T) {
 
 	`
 	expectedTreeL := map[string][]string{
-		"": []string{"search"},
-		"search": []string{
+		"": {"search"},
+		"search": {
 			"aggregations_FALSE", "some_field"},
-		"search.aggregations_FALSE": []string{"departments"},
-		"search.aggregations_FALSE.departments": []string{
+		"search.aggregations_FALSE": {"departments"},
+		"search.aggregations_FALSE.departments": {
 			"slug", "name", "__typename"}}
 
 	generatedTreeL := BuildTreeUsingAliases(graphqlQueryL, Variables{
@@ -422,10 +423,10 @@ func TestBuildTree(t *testing.T) {
 
 	`
 	expectedTreeM := map[string][]string{
-		"":                    []string{"search"},
-		"search":              []string{"aggregations", "lorem", "some_field"},
-		"search.aggregations": []string{"departments"},
-		"search.aggregations.departments": []string{
+		"":                    {"search"},
+		"search":              {"aggregations", "lorem", "some_field"},
+		"search.aggregations": {"departments"},
+		"search.aggregations.departments": {
 			"slug", "name", "__typename"}}
 
 	generatedTreeM := BuildTreeUsingAliases(graphqlQueryM, Variables{

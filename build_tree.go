@@ -1,6 +1,7 @@
 package fields
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -23,15 +24,35 @@ and returns a map with requested fields for each field.
 			"users": []string{"id", "name"},
 		}
 */
-func BuildTree(request string, variables map[string]interface{}) map[string][]string {
-	return buildTreeWithAliasStrategy(request, "merge", variables)
+
+type aliasStrategy int
+
+const (
+	aliasStrategyMerge aliasStrategy = iota
+	aliasStrategyReplace
+)
+
+type AliasStrategyOrRegexp interface {
+	aliasStrategy | func(string) string
 }
 
-func BuildTreeUsingAliases(request string, variables map[string]interface{}) map[string][]string {
-	return buildTreeWithAliasStrategy(request, "replace", variables)
+func BuildTree(request string, variables map[string]any) map[string][]string {
+	return buildTreeWithAliasStrategy(request, aliasStrategyMerge, variables)
 }
 
-func buildTreeWithAliasStrategy(request string, aliasStrategy string, variables map[string]interface{}) map[string][]string {
+func BuildTreeUsingAliases(request string, variables map[string]any) map[string][]string {
+	return buildTreeWithAliasStrategy(request, aliasStrategyReplace, variables)
+}
+
+func BuildTreeUsingCustomStrategy(
+	request string, variables map[string]any, strategy func(string) string,
+) map[string][]string {
+	return buildTreeWithAliasStrategy(request, strategy, variables)
+}
+
+func buildTreeWithAliasStrategy[AS AliasStrategyOrRegexp](
+	request string, aliasStrategy AS, variables map[string]interface{},
+) map[string][]string {
 	tree := make(map[string][]string)
 
 	if schemaRegex.MatchString(request) {
@@ -103,15 +124,18 @@ func removeCommas(request string) string {
 	return commasRegex.ReplaceAllString(request, "\n")
 }
 
-func normalizeAlias(request string, strategy string) string {
-	if strategy == "merge" {
-		return aliasMergeRegex.ReplaceAllString(request, "\n")
+func normalizeAlias[AS AliasStrategyOrRegexp](request string, strategy AS) string {
+	switch v := any(strategy).(type) {
+	case aliasStrategy:
+		switch v {
+		case aliasStrategyMerge:
+			return aliasMergeRegex.ReplaceAllString(request, "\n")
+		case aliasStrategyReplace:
+			return aliasReplaceRegex.ReplaceAllString(request, "\n")
+		}
+	case *regexp.Regexp:
+		return v.ReplaceAllString(request, "\n")
 	}
-
-	if strategy == "replace" {
-		return aliasReplaceRegex.ReplaceAllString(request, "\n")
-	}
-
 	return request
 }
 
