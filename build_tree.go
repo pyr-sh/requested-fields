@@ -1,7 +1,6 @@
 package fields
 
 import (
-	"regexp"
 	"sort"
 	"strings"
 )
@@ -133,8 +132,8 @@ func normalizeAlias[AS AliasStrategyOrRegexp](request string, strategy AS) strin
 		case aliasStrategyReplace:
 			return aliasReplaceRegex.ReplaceAllString(request, "\n")
 		}
-	case *regexp.Regexp:
-		return v.ReplaceAllString(request, "\n")
+	case func(string) string:
+		return v(request)
 	}
 	return request
 }
