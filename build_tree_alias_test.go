@@ -1,8 +1,9 @@
 package fields
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildTreeAlias(t *testing.T) {
@@ -19,8 +20,8 @@ func TestBuildTreeAlias(t *testing.T) {
 	`
 
 	expectedTreeA := map[string][]string{
-		"":       []string{"search"},
-		"search": []string{"filters", "connection"}}
+		"":       {"search"},
+		"search": {"filters", "connection"}}
 
 	generatedTreeA := BuildTree(graphqlQueryA, Variables{})
 
@@ -43,10 +44,10 @@ func TestBuildTreeAlias(t *testing.T) {
 	`
 
 	expectedTreeB := map[string][]string{
-		"":       []string{"search", "best", "worst"},
-		"best":   []string{"connection"},
-		"search": []string{"filters"},
-		"worst":  []string{"term"}}
+		"":       {"search", "best", "worst"},
+		"best":   {"connection"},
+		"search": {"filters"},
+		"worst":  {"term"}}
 
 	generatedTreeB := BuildTreeUsingAliases(graphqlQueryB, Variables{})
 
@@ -68,9 +69,9 @@ func TestBuildTreeAlias(t *testing.T) {
 	}
 	`
 	expectedTreeC := map[string][]string{
-		"":            []string{"user", "custom_user"},
-		"user":        []string{"id", "custom_name", "birthday"},
-		"custom_user": []string{"id", "name", "age"}}
+		"":            {"user", "custom_user"},
+		"user":        {"id", "custom_name", "birthday"},
+		"custom_user": {"id", "name", "age"}}
 
 	generatedTreeC := BuildTreeUsingAliases(graphqlQueryC, Variables{})
 
